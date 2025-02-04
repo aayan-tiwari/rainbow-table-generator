@@ -1,18 +1,19 @@
 #include <stdio.h>
-#include <stdint.h>                                                                                                                                                                                                                        
-#include <string.h>                                                                                                                                                                                                                        
-#include <stdlib.h>                                                                                                                                                                                                                        
-int md5(){                                                                                                                                                                                                                                 
-#define MD5_A 0x67452301                                                                                                                                                                                                                   
-#define MD5_B 0xefcdab89                                                                                                                                                                                                                   
-#define MD5_C 0x98badcfe                                                                                                                                                                                                                   
-#define MD5_D 0x10325476                                                                                                                                                                                                                   
-                                                                                                                                                                                                                                           
-static uint32_t S[] = {7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,                                                                                                                                                         
-                       5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,                                                                                                                                                         
-                       4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,                                                                                                                                                         
-                       6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21};                                                                                                                                                        
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#include "aesenc.c"
+int md5(){
+#define MD5_A 0x67452301
+#define MD5_B 0xefcdab89
+#define MD5_C 0x98badcfe
+#define MD5_D 0x10325476
 
+static uint32_t S[] = {7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+                       5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
+                       4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+                       6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21};
 static uint32_t K[] = {0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
                        0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
                        0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
@@ -22,19 +23,18 @@ static uint32_t K[] = {0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
                        0x21e1cde6, 0xc33707d6, 0xf4d50d87, 0x455a14ed,
                        0xa9e3e905, 0xfcefa3f8, 0x676f02d9, 0x8d2a4c8a,
                        0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c,
-                       0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70,                                                                                                                                                                     
-                       0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05,                                                                                                                                                                     
-                       0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,                                                                                                                                                                     
-                       0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039,                                                                                                                                                                     
-                       0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1,                                                                                                                                                                     
-                       0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1,                                                                                                                                                                     
-                       0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391};                                                                                                                                                                    
-                                                                                                                                                                                                                                           
-static uint8_t PADDING[] = {0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                                                                                                                                                                
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                                                                                                                                                                
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                                                                                                                                                                
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                                                                                                                                                                
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                                                                                                                                                                
+                       0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70,                                                                                                                                                                    
+                       0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05,                                                                                                                                                                    
+                       0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,                                                                                                                                                                    
+                       0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039,                                                                                                                                              
+                       0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1,
+                       0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1,
+                       0xf7537e82,0xbd3af235,0x2ad7d2bb,0xeb86d391};
+static uint8_t PADDING[] = {0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                                                                                                                                                           
+                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                                                                                                                                                              
+                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                                                                                                                                                              
+                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                                                                                                                                                               
+                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                                                                                                                                                             
                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -296,9 +296,49 @@ int sha256hash() {
 }
 sha256hash();
 }
+int encryption(){
+int choice;
+    printf("Select an option:\n");
+    printf("1. Encrypt a file\n");
+    printf("2. Decrypt a file\n");
+    printf("Enter your choice (1 or 2): ");
+    scanf("%d", &choice);
+    uint8_t key[16];
+    if (choice == 1) {
+        srand((unsigned int)time(NULL));
+        for (int i = 0; i < 16; i++) {
+            key[i] = (uint8_t)(rand() % 256);  
+        }
+        printf("Generated Key: ");
+        for (int i = 0; i < 16; i++) {
+        printf("%02x", key[i]);
+        }
+        printf("\n");
+        const char* input_file = "output.txt";
+        const char* output_file = "encrypted.bin";
+        encrypt_file(input_file, output_file, key);
+        printf("File encrypted successfully. Encrypted file: %s\n", output_file);
+    } else if (choice == 2) {
+        char key_input[33];
+        int i;
+        const char* input_file = "encrypted.bin";
+        const char* output_file = "decrypted.txt";
+        printf("Enter key:");
+        scanf("%32s",&key_input[i]);
+         for (int i = 0; i < 16; i++) {
+            sscanf(&key_input[i * 2], "%2hhx", &key[i]);
+        }
+        decrypt_file(input_file, output_file, key);
+        printf("File decrypted successfully. Decrypted file: %s\n", output_file);
+    } else {
+        printf("Invalid choice. Please select 1 or 2.\n");
+    }
+    return 0;
+}
+
 int main(){
 int a;
-printf("Enter a number\n----------------------------------\n1 for MD5\n2 for SHA-256\n----------------------------------\n");
+printf("Enter a number\n----------------------------------\n1 for MD5\n2 for SHA-256\n3 for encryption and decryption\n----------------------------------\n");
 scanf("%d",&a);
 switch (a) {
   case 1:
@@ -307,6 +347,9 @@ switch (a) {
   case 2:
     sha256();
     break;
+  case 3:
+    encryption();
   default:
-    printf("Incorrect choice");
-}}
+    printf("Program exited!!");
+}
+}
